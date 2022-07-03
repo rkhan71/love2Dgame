@@ -5,21 +5,6 @@ function love.load()
 
     world = love.physics.newWorld(0, 0, false)
 
-    floor = {}
-    floor.body = love.physics.newBody(world, ww / 2, wh - 1, 'static')
-    floor.shape = love.physics.newRectangleShape(ww, 2)
-    floor.fixture = love.physics.newFixture(floor.body, floor.shape)
-
-    wallr = {}
-    wallr.body = love.physics.newBody(world, ww + 100, wh / 2, 'static')
-    wallr.shape = love.physics.newRectangleShape(2, wh)
-    wallr.fixture = love.physics.newFixture(wallr.body, wallr.shape)
-
-    walll = {}
-    walll.body = love.physics.newBody(world, -100, wh / 2, 'static')
-    walll.shape = love.physics.newRectangleShape(2, wh)
-    walll.fixture = love.physics.newFixture(walll.body, walll.shape)
-
     function reset()
         basket = {}
         basket.body = love.physics.newBody(world, (ww / 2), wh - 50, 'kinematic')
@@ -34,7 +19,15 @@ function love.load()
 
         score = 0
         lives = 3
+
+        if love.filesystem.exists('highscore.txt') then
+            highscore = love.filesystem.read('highscore.txt')
+        else
+            file = love.filesystem.newFile('highscore.txt')
+            highscore = '0'
+        end
     end
+    reset()
 
     play = false
 end
@@ -46,7 +39,7 @@ function love.update(dt)
         local x, y = basket.body:getPosition()
         local fx, fy = fruit.body:getPosition()
         move = false
-        speed = 200
+        speed = 500
         if love.keyboard.isDown('right') then
             x = x + speed * dt
             move = true
@@ -54,29 +47,41 @@ function love.update(dt)
             x = x - speed * dt
             move = true
         end
+        if x >= ww + 50 then
+            x = x - speed * dt
+            move = true
+        elseif x <= -50 then
+            x = x + speed * dt
+            move = true
+        end
         if move then
             basket.body:setPosition(x, y)
         end
 
-        fspeed = 100
+        fspeed = 300
         fruit.body:setPosition(fx, fy + fspeed * dt)
 
         if basket.body:isTouching(fruit.body) and (fx >= x - 50) and (fx <= x + 50) then
             score = score + 1
             fruit.body:setPosition(love.math.random(25, ww - 25), 0)
         end
-        if fruit.body:isTouching(floor.body) then
+
+        if fy >= wh + 25 then
             lives = lives - 1
             fruit.body:setPosition(love.math.random(25, ww - 25), 0)
         end
+
         if lives == 0 then
+            if score > tonumber(highscore) then
+                love.filesystem.write('highscore.txt', score)
+            end
             play = false
+            reset()
         end
     else
         function love.keypressed(key)
             if key == 'space' then
                 play = true
-                reset()
             end
         end
     end
@@ -88,6 +93,6 @@ function love.draw()
         love.graphics.circle('fill', fruit.body:getX(), fruit.body:getY(), fruit.shape:getRadius())
         love.graphics.print('Score: '..score..'\nLives: '..lives, 15, 15)
     else
-        love.graphics.print('Press Spacebar to Start\nHighscore: ', 15, 15)
+        love.graphics.print('Press Spacebar to Start\nHighscore: '..highscore, 15, 15)
     end
 end

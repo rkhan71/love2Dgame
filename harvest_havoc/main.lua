@@ -3,50 +3,52 @@ function love.load()
     wh = 540
     love.window.setMode(ww, wh)
 
-    basket = {
-        x = (ww / 2) - 50,
-        y = wh - 100,
-        ht = 100,
-        wd = 100
-    }
-
-    fruit = {
-        rad = 25,
-        x = love.math.random(25, ww - 25),
-        y = 0,
-        vel = 100
-    }
-
     world = love.physics.newWorld(0, 9.81, false)
-    bodyb = love.physics.newBody(world, basket.x, basket.y, 'kinematic')
-    bodyf = love.physics.newBody(world, fruit.x, fruit.y, 'dynamic')
-    shapeb = love.physics.newRectangleShape(basket.wd, basket.ht)
-    shapef = love.physics.newCircleShape(fruit.rad)
-    fixtureb = love.physics.newFixture(bodyb, shapeb)
-    fixturef = love.physics.newFixture(bodyf, shapef)
+
+    basket = {}
+    basket.body = love.physics.newBody(world, (ww / 2), wh - 50, 'kinematic')
+    basket.shape = love.physics.newRectangleShape(100, 100)
+    basket.fixture = love.physics.newFixture(basket.body, basket.shape)
+
+    fruit = {}
+    fruit.body = love.physics.newBody(world, love.math.random(25, ww - 25), 0, 'dynamic')
+    fruit.shape = love.physics.newCircleShape(25)
+    fruit.fixture = love.physics.newFixture(fruit.body, fruit.shape)
 
     score = 0
+    lives = 3
 end
 
 function love.update(dt)
     world:update(dt)
-    
-    fruit.x, fruit.y = bodyf:getWorldPoints(shapef:getPoint())
-    if love.keyboard.isDown('left') then
-        basket.x = basket.x - 3
-    end
+
+    local x, y = basket.body:getPosition()
+    local fx, fy = fruit.body:getPosition()
+    move = false
+    speed = 100
     if love.keyboard.isDown('right') then
-        basket.x = basket.x + 3
+        x = x + speed * dt
+        move = true
+    elseif love.keyboard.isDown('left') then
+        x = x - speed * dt
+        move = true
     end
-    if basket.x <= 0 then
-        basket.x = basket.x + 3
-    elseif basket.x >= 860 then
-        basket.x = basket.x - 3
+    if move then
+        basket.body:setPosition(x, y)
+    end
+
+    if basket.body:isTouching(fruit.body) and (fx >= x - 50) and (fx <= x + 50) then
+        score = score + 1
+        fruit.body:setPosition(love.math.random(25, ww - 25), 0)
+    end
+    if fy >= wh then
+        lives = lives - 1
+        fruit.body:setPosition(love.math.random(25, ww - 25), 0)
     end
 end
 
 function love.draw()
-    love.graphics.rectangle('fill', basket.x, basket.y, basket.wd, basket.ht)
-    love.graphics.circle('fill', fruit.x, fruit.y, fruit.rad)
-    love.graphics.print('Score: '..score, 15, 15)
+    love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
+    love.graphics.circle('fill', fruit.body:getX(), fruit.body:getY(), fruit.shape:getRadius())
+    love.graphics.print('Score: '..score..'\nLives: '..lives, 15, 15)
 end

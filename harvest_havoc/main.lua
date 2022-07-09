@@ -27,6 +27,7 @@ function love.load()
         basket.body:setPosition((ww / 2), wh - 50)
 
         score = 0
+        count = 0
         lives = 3
 
         if love.filesystem.getInfo('highscore.txt') then
@@ -81,31 +82,41 @@ function love.update(dt)
         if basket.body:isTouching(circle.body) and (cx >= x - 50) and (cx <= x + 50) then
             if fruit == 'circle' then
                 score = score + 1
-                circle.body:setPosition(love.math.random(25, ww - 25), -25)
+                count = 0
             else
                 lives = lives - 1
-                circle.body:setPosition(love.math.random(25, ww - 25), -25)
             end
+            circle.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
         if basket.body:isTouching(tri.body) and (tx >= x - 50) and (tx <= x + 50) then
             if fruit == 'triangle' then
                 score = score + 1
-                tri.body:setPosition(love.math.random(25, ww - 25), -10)
+                count = 0
             else
                 lives = lives - 1
-                tri.body:setPosition(love.math.random(25, ww - 25), -10)
             end
+            tri.body:setPosition(love.math.random(25, ww - 25), -10)
         end
 
         if cy >= wh + 25 then
+            if fruit == 'circle' then
+                count = count + 1
+            end
             circle.body:setPosition(love.math.random(25, ww - 25), -10)
         end
 
         if ty >= wh + 25 then
+            if fruit == 'triangle' then
+                count = count + 1
+            end
             tri.body:setPosition(love.math.random(25, ww - 25), -10)
         end
 
+        if count == 3 then
+            lives = lives - 1
+        end
+        
         if lives == 0 then
             if score > tonumber(highscore) then
                 love.filesystem.write('highscore.txt', score)
@@ -132,7 +143,7 @@ function love.draw()
         love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
         love.graphics.polygon('fill', tri.body:getWorldPoints(tri.shape:getPoints()))
         love.graphics.circle('fill', circle.body:getX(), circle.body:getY(), circle.shape:getRadius())
-        love.graphics.print('Score: '..score..'\nLives: '..lives..'\nHarvest: '..fruit, 15, 15)
+        love.graphics.print('Score: '..score..'\nLives: '..lives..'\nCount: '..count..'\nHarvest: '..fruit, 15, 15)
     else
         love.graphics.print('Press Spacebar to Start\nHighscore: '..highscore, 15, 15)
     end

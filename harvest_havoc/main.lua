@@ -20,6 +20,7 @@ function love.load()
     tri.body = love.physics.newBody(world, love.math.random(25, ww - 25), -10, 'dynamic')
     tri.shape = love.physics.newPolygonShape(0, -25, 25, 10, -25, 10)
     tri.fixture = love.physics.newFixture(tri.body, tri.shape)
+    tri.body:setFixedRotation(true)
 
     function reset()
         circle.body:setPosition(love.math.random(25, ww - 25), -25)
@@ -116,7 +117,7 @@ function love.update(dt)
         if count == 3 then
             lives = lives - 1
         end
-        
+
         if lives == 0 then
             if score > tonumber(highscore) then
                 love.filesystem.write('highscore.txt', score)

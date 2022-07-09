@@ -5,21 +5,26 @@ function love.load()
 
     world = love.physics.newWorld(0, 0, false)
 
+    
+    basket = {}
+    basket.body = love.physics.newBody(world, (ww / 2), wh - 50, 'kinematic')
+    basket.shape = love.physics.newRectangleShape(100, 100)
+    basket.fixture = love.physics.newFixture(basket.body, basket.shape)
+
+    circle = {}
+    circle.body = love.physics.newBody(world, love.math.random(25, ww - 25), -25, 'dynamic')
+    circle.shape = love.physics.newCircleShape(25)
+    circle.fixture = love.physics.newFixture(circle.body, circle.shape)
+
+    tri = {}
+    tri.body = love.physics.newBody(world, love.math.random(25, ww - 25), -10, 'dynamic')
+    tri.shape = love.physics.newPolygonShape(0, -25, 25, 10, -25, 10)
+    tri.fixture = love.physics.newFixture(tri.body, tri.shape)
+
     function reset()
-        basket = {}
-        basket.body = love.physics.newBody(world, (ww / 2), wh - 50, 'kinematic')
-        basket.shape = love.physics.newRectangleShape(100, 100)
-        basket.fixture = love.physics.newFixture(basket.body, basket.shape)
-
-        circle = {}
-        circle.body = love.physics.newBody(world, love.math.random(25, ww - 25), -25, 'dynamic')
-        circle.shape = love.physics.newCircleShape(25)
-        circle.fixture = love.physics.newFixture(circle.body, circle.shape)
-
-        tri = {}
-        tri.body = love.physics.newBody(world, love.math.random(25, ww - 25), -10, 'dynamic')
-        tri.shape = love.physics.newPolygonShape(0, -25, 25, 10, -25, 10)
-        tri.fixture = love.physics.newFixture(tri.body, tri.shape)
+        circle.body:setPosition(love.math.random(25, ww - 25), -25)
+        tri.body:setPosition(love.math.random(25, ww - 25), -10)
+        basket.body:setPosition((ww / 2), wh - 50)
 
         score = 0
         lives = 3
@@ -76,29 +81,29 @@ function love.update(dt)
         if basket.body:isTouching(circle.body) and (cx >= x - 50) and (cx <= x + 50) then
             if fruit == 'circle' then
                 score = score + 1
-                circle.body:setPosition(love.math.random(25, ww - 25), 0)
+                circle.body:setPosition(love.math.random(25, ww - 25), -25)
             else
                 lives = lives - 1
-                circle.body:setPosition(love.math.random(25, ww - 25), 0)
+                circle.body:setPosition(love.math.random(25, ww - 25), -25)
             end
         end
 
         if basket.body:isTouching(tri.body) and (tx >= x - 50) and (tx <= x + 50) then
             if fruit == 'triangle' then
                 score = score + 1
-                tri.body:setPosition(love.math.random(25, ww - 25), 0)
+                tri.body:setPosition(love.math.random(25, ww - 25), -10)
             else
                 lives = lives - 1
-                tri.body:setPosition(love.math.random(25, ww - 25), 0)
+                tri.body:setPosition(love.math.random(25, ww - 25), -10)
             end
         end
 
         if cy >= wh + 25 then
-            circle.body:setPosition(love.math.random(25, ww - 25), 0)
+            circle.body:setPosition(love.math.random(25, ww - 25), -10)
         end
 
         if ty >= wh + 25 then
-            tri.body:setPosition(love.math.random(25, ww - 25), 0)
+            tri.body:setPosition(love.math.random(25, ww - 25), -10)
         end
 
         if lives == 0 then

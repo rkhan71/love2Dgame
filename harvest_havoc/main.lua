@@ -46,6 +46,8 @@ function love.load()
         fruits = {'circle', 'triangle'}
         fruit = fruits[love.math.random(2)]
         time = love.math.random(3, 6)
+        fspeed = 100
+        speed = 300
     end
     reset()
 
@@ -64,13 +66,15 @@ function love.update(dt)
         world:update(dt)
 
         time = time - dt
+        fspeed = fspeed + 3*dt
+        speed = speed + 3*dt
 
         local x, y = basket.body:getPosition()
         local cx, cy = circle.body:getPosition()
         local tx, ty = tri.body:getPosition()
 
         move = false
-        speed = 500
+
         if love.keyboard.isDown('right') then
             x = x + speed * dt
             move = true
@@ -89,7 +93,6 @@ function love.update(dt)
             basket.body:setPosition(x, y)
         end
 
-        fspeed = 300
         circle.body:setPosition(cx, cy + fspeed * dt)
         tri.body:setPosition(tx, ty + fspeed * dt)
 

@@ -121,9 +121,9 @@ function love.update(dt)
         circle.body:setPosition(cx, cy + fspeed * dt)
         tri.body:setPosition(tx, ty + fspeed * dt)
 
-        -- Check if player has caught fruit (basket it touching fruit and it is in the right position), then either
+        -- Check if player has caught fruit (basket it touching fruit and fruit is in the right area), then either
         -- award points and reset count variable or decrease lives. Always reset position of fruit. 
-        if basket.body:isTouching(circle.body) and (cx >= x - 50) and (cx <= x + 50) then
+        if basket.body:isTouching(circle.body) and (cx >= x - 50) and (cx <= x + 50) and (cy <= y) then
             if fruit == 'circle' then
                 score = score + 1
                 love.audio.play(gain)
@@ -135,7 +135,7 @@ function love.update(dt)
             circle.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if basket.body:isTouching(tri.body) and (tx >= x - 50) and (tx <= x + 50) then
+        if basket.body:isTouching(tri.body) and (tx >= x - 50) and (tx <= x + 50) and (ty <= y) then
             if fruit == 'triangle' then
                 score = score + 1
                 love.audio.play(gain)

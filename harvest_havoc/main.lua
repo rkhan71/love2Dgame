@@ -55,11 +55,18 @@ function love.load()
         fruits = {'circle', 'triangle'}
         fruit = fruits[love.math.random(2)]
         -- Random time interval at which the fruit to harvest is switched
-        time = love.math.random(3, 6)
+        time = love.math.random(5, 10)
 
         -- Initial speeds of fruit falling down and players basket moving side to side
         fspeed = 100
         speed = 300
+
+        -- Initial increase in points for catching correct fruit (increase grows if you catch fruit many times in a row)
+        inc = 1
+
+        -- variable to see when player scores points, and timer for how long to show gain in points
+        point = false
+        ptimer = 0
     end
     reset()
 
@@ -82,8 +89,14 @@ function love.update(dt)
         time = time - dt
         if time <= 0 then
             love.audio.play(change)
-            time = love.math.random(3,6)
+            time = love.math.random(5, 10)
             fruit = fruits[love.math.random(2)]
+        end
+
+        -- Timer for how long to show gain in points
+        ptimer = ptimer - dt
+        if ptimer <= 0 then
+            point = false
         end
 
         -- Increase speed of fruits and basket as time passes
@@ -91,7 +104,7 @@ function love.update(dt)
         speed = speed + 3*dt
 
         -- Get positions of bodies
-        local x, y = basket.body:getPosition()
+        x, y = basket.body:getPosition()
         local cx, cy = circle.body:getPosition()
         local tx, ty = tri.body:getPosition()
 
@@ -122,13 +135,17 @@ function love.update(dt)
         tri.body:setPosition(tx, ty + fspeed * dt)
 
         -- Check if player has caught fruit (basket it touching fruit and fruit is in the right area), then either
-        -- award points and reset count variable or decrease lives. Always reset position of fruit. 
+        -- award points and reset count variable or decrease lives and reset increase to 0. Always reset position of fruit. 
         if basket.body:isTouching(circle.body) and (cx >= x - 50) and (cx <= x + 50) and (cy <= y) then
             if fruit == 'circle' then
-                score = score + 1
+                score = score + inc
+                inc = inc + 1
                 love.audio.play(gain)
                 count = 0
+                point = true
+                ptimer = 0.5
             else
+                inc = 1
                 lives = lives - 1
                 love.audio.play(life)
             end
@@ -137,20 +154,25 @@ function love.update(dt)
 
         if basket.body:isTouching(tri.body) and (tx >= x - 50) and (tx <= x + 50) and (ty <= y) then
             if fruit == 'triangle' then
-                score = score + 1
+                score = score + inc
+                inc = inc + 1
                 love.audio.play(gain)
                 count = 0
+                point = true
+                ptimer = 0.5
             else
+                inc = 1
                 lives = lives - 1
                 love.audio.play(life)
             end
             tri.body:setPosition(love.math.random(25, ww - 25), -10)
         end
 
-        -- Reset fruit positions when they reach the bottom of the screen
+        -- Reset fruit positions when they reach the bottom of the screen, if fruit to harvest is missed increase count and reset increase
         if cy >= wh + 25 then
             if fruit == 'circle' then
                 count = count + 1
+                inc = 1
             end
             circle.body:setPosition(love.math.random(25, ww - 25), -10)
         end
@@ -158,13 +180,15 @@ function love.update(dt)
         if ty >= wh + 25 then
             if fruit == 'triangle' then
                 count = count + 1
+                inc = 1
             end
             tri.body:setPosition(love.math.random(25, ww - 25), -10)
         end
 
-        -- If player drops fruit they were supposed to catch 3 times in a row they lose a life 
+        -- If player drops fruit they were supposed to catch 3 times in a row they lose a life, count resets to 0 
         if count == 3 then
             lives = lives - 1
+            count = 0
             love.audio.play(life)
         end
 
@@ -211,6 +235,11 @@ function love.draw()
 
         -- Show all the in game variables in the top left corner of the screen
         love.graphics.print('Score: '..score..'\nLives: '..lives..'\nCount: '..count..'\nHarvest: '..fruit, 15, 15)
+
+        -- Show a gain in points when player catches correct fruit
+        if point then
+            love.graphics.print('+'..inc - 1, ww / 2, wh / 2)
+        end
     elseif loser then
         -- Game Over screen
         love.graphics.print('GAME OVER', ww / 2, wh / 2)

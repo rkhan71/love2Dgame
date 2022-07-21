@@ -23,6 +23,12 @@ function love.load()
     tri.fixture = love.physics.newFixture(tri.body, tri.shape)
     tri.body:setFixedRotation(true)
 
+    sq = {}
+    sq.body = love.physics.newBody(world, love.math.random(25, ww - 25), -25, 'dynamic')
+    sq.shape = love.physics.newRectangleShape(50, 50)
+    sq.fixture = love.physics.newFixture(sq.body, sq.shape)
+    sq.body:setFixedRotation(true)
+
     -- Load in all the sounds
     loadscreen = love.audio.newSource('loadscreen.mp3', 'stream')
     playing = love.audio.newSource('play.mp3', 'stream')
@@ -35,6 +41,7 @@ function love.load()
     function reset()
         -- Positions of bodies
         circle.body:setPosition(love.math.random(25, ww - 25), -25)
+        sq.body:setPosition(love.math.random(25, ww - 25), -25)
         tri.body:setPosition(love.math.random(25, ww - 25), -10)
         basket.body:setPosition((ww / 2), wh - 50)
 
@@ -52,8 +59,8 @@ function love.load()
         end
 
         -- Set up fruits array which can be randomly indexed to show which "fruit" the player should catch
-        fruits = {'circle', 'triangle'}
-        fruit = fruits[love.math.random(2)]
+        fruits = {'circle', 'triangle', 'square'}
+        fruit = fruits[love.math.random(3)]
         -- Random time interval at which the fruit to harvest is switched
         time = love.math.random(5, 10)
 
@@ -91,7 +98,7 @@ function love.update(dt)
         if time <= 0 then
             love.audio.play(change)
             time = love.math.random(5, 10)
-            fruit = fruits[love.math.random(2)]
+            fruit = fruits[love.math.random(3)]
         end
 
         -- Timer for how long to show gain in points
@@ -108,6 +115,7 @@ function love.update(dt)
         x, y = basket.body:getPosition()
         local cx, cy = circle.body:getPosition()
         local tx, ty = tri.body:getPosition()
+        local sx, sy = sq.body:getPosition()
 
         -- Variable to check if the player tries to move the basket, when it's true the position of the basket is reset
         move = false
@@ -134,6 +142,7 @@ function love.update(dt)
         -- Making fruits come down the screen using fspeed variable
         circle.body:setPosition(cx, cy + fspeed * dt)
         tri.body:setPosition(tx, ty + fspeed * dt)
+        sq.body:setPosition(sx, sy + fspeed * dt)
 
         -- Check if player has caught fruit (basket it touching fruit and fruit is in the right area), then either
         -- award points and reset count variable or decrease lives and reset increase to 0. Always reset position of fruit. 
@@ -153,7 +162,7 @@ function love.update(dt)
             circle.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if basket.body:isTouching(tri.body) and (tx >= x - 50) and (tx <= x + 50) and (ty <= y) then
+        if basket.body:isTouching(tri.body) and (tx >= x - 75) and (tx <= x + 75) and (ty <= y) then
             if fruit == 'triangle' then
                 score = score + inc
                 inc = inc + 1
@@ -169,6 +178,22 @@ function love.update(dt)
             tri.body:setPosition(love.math.random(25, ww - 25), -10)
         end
 
+        if basket.body:isTouching(sq.body) and (sx >= x - 50) and (sx <= x + 50) and (sy <= y) then
+            if fruit == 'square' then
+                score = score + inc
+                inc = inc + 1
+                love.audio.play(gain)
+                count = 0
+                point = true
+                ptimer = 0.5
+            else
+                inc = 1
+                lives = lives - 1
+                love.audio.play(life)
+            end
+            sq.body:setPosition(love.math.random(25, ww - 25), -25)
+        end
+
         -- Reset fruit positions when they reach the bottom of the screen, if fruit to harvest is missed increase count and reset increase
         if cy >= wh + 25 then
             if fruit == 'circle' then
@@ -178,12 +203,20 @@ function love.update(dt)
             circle.body:setPosition(love.math.random(25, ww - 25), -10)
         end
 
-        if ty >= wh + 25 then
+        if ty >= wh + 10 then
             if fruit == 'triangle' then
                 count = count + 1
                 inc = 1
             end
             tri.body:setPosition(love.math.random(25, ww - 25), -10)
+        end
+
+        if sy >= wh + 25 then
+            if fruit == 'square' then
+                count = count + 1
+                inc = 1
+            end
+            sq.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
         -- If player drops fruit they were supposed to catch 3 times in a row they lose a life, count resets to 0 
@@ -218,6 +251,11 @@ function love.update(dt)
                 help = false
             end
         end
+
+        -- Loadscreen music
+        if not loadscreen:isPlaying() and not gameover:isPlaying() then
+            love.audio.play(loadscreen)
+        end
     else
         function love.keypressed(key)
             -- Here the game is not being played so we allow the player to start the game using spacebar
@@ -244,6 +282,7 @@ function love.draw()
         -- Draw all the bodies 
         love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
         love.graphics.polygon('fill', tri.body:getWorldPoints(tri.shape:getPoints()))
+        love.graphics.polygon('fill', sq.body:getWorldPoints(sq.shape:getPoints()))
         love.graphics.circle('fill', circle.body:getX(), circle.body:getY(), circle.shape:getRadius())
 
         -- Show all the in game variables in the top left corner of the screen

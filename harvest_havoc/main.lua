@@ -73,6 +73,7 @@ function love.load()
     -- variables to check whether the game is being played and if a player has just lost
     play = false
     loser = false
+    help = false
 end
 
 function love.update(dt)
@@ -210,15 +211,27 @@ function love.update(dt)
             love.timer.sleep(5)
             loser = false
         end
-    else
-        -- Here the game is not being played so we allow the user to start the game using spacebar
+    elseif help then
+        -- Let user exit instructions screen
         function love.keypressed(key)
+            if key == 'escape' then
+                help = false
+            end
+        end
+    else
+        function love.keypressed(key)
+            -- Here the game is not being played so we allow the player to start the game using spacebar
             if key == 'space' and loser == false then
                 love.audio.stop(loadscreen)
                 play = true
             end
+
+            -- Let player see instructions on how to play the game
+            if key == 'i' and loser == false then
+                help = true
+            end
         end
-        
+
         -- Loadscreen music
         if not loadscreen:isPlaying() and not gameover:isPlaying() then
             love.audio.play(loadscreen)
@@ -243,8 +256,11 @@ function love.draw()
     elseif loser then
         -- Game Over screen
         love.graphics.print('GAME OVER', ww / 2, wh / 2)
+    elseif help then
+        -- Instructions screen
+        love.graphics.printf("Instructions\n(press 'esc' to exit)\n\nThe aim of the game is to harvest as many 'fruits' as you can. The fruits fall from the top of the screen and you can harvest them by putting your basket underneath them before they hit the floor. You can move your basket using the left and right arrow keys.\n\nHowever, the fruit that you need to harvest will change periodically. The fruit to harvest is displayed in the top left corner of the screen. When the fruit to harvest changes, a clown will alert you by honking his horn. But the clown also attempts to throw you off by blowing his horn at times when the fruit to harvest has not changed!\n\nYou gain points for harvesting the correct fruit. If you keep harvesting the correct fruit without dropping any or harvesting fruits you were not supposed to, the number of points you gain increases. However, if you harvest the wrong fruit or drop the fruit you were supposed to harvest 3 times in a row then you will lose a life. You only have 3 lives so be careful! Your score, lives, and count of how many fruits to harvest you have dropped in a row, are also displayed in the top left corner of the screen.\n\nThat's all you need to know. Enjoy!", 15, 15, 930)
     else
         -- Loadscreen
-        love.graphics.print('Press Spacebar to Start\nHighscore: '..highscore, 15, 15)
+        love.graphics.print("Press Spacebar to Start\nPress 'i' for Instructions\nHighscore: "..highscore, 15, 15)
     end
 end

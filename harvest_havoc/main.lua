@@ -12,22 +12,20 @@ function love.load()
     basket.shape = love.physics.newRectangleShape(100, 100)
     basket.fixture = love.physics.newFixture(basket.body, basket.shape)
 
-    circle = {}
-    circle.body = love.physics.newBody(world, love.math.random(25, ww - 25), -25, 'dynamic')
-    circle.shape = love.physics.newCircleShape(25)
-    circle.fixture = love.physics.newFixture(circle.body, circle.shape)
+    red = {}
+    red.body = love.physics.newBody(world, love.math.random(25, ww - 25), -25, 'dynamic')
+    red.shape = love.physics.newCircleShape(25)
+    red.fixture = love.physics.newFixture(red.body, red.shape)
 
-    tri = {}
-    tri.body = love.physics.newBody(world, love.math.random(25, ww - 25), -10, 'dynamic')
-    tri.shape = love.physics.newPolygonShape(0, -25, 25, 10, -25, 10)
-    tri.fixture = love.physics.newFixture(tri.body, tri.shape)
-    tri.body:setFixedRotation(true)
+    green = {}
+    green.body = love.physics.newBody(world, love.math.random(25, ww - 25), -25, 'dynamic')
+    green.shape = love.physics.newCircleShape(25)
+    green.fixture = love.physics.newFixture(green.body, green.shape)
 
-    sq = {}
-    sq.body = love.physics.newBody(world, love.math.random(25, ww - 25), -25, 'dynamic')
-    sq.shape = love.physics.newRectangleShape(50, 50)
-    sq.fixture = love.physics.newFixture(sq.body, sq.shape)
-    sq.body:setFixedRotation(true)
+    blue = {}
+    blue.body = love.physics.newBody(world, love.math.random(25, ww - 25), -25, 'dynamic')
+    blue.shape = love.physics.newCircleShape(25)
+    blue.fixture = love.physics.newFixture(blue.body, blue.shape)
 
     -- Load in all the sounds
     loadscreen = love.audio.newSource('loadscreen.mp3', 'stream')
@@ -40,9 +38,9 @@ function love.load()
     -- Reset function called whenever game ends so that when player restarts, the game is normal
     function reset()
         -- Positions of bodies
-        circle.body:setPosition(love.math.random(25, ww - 25), -25)
-        sq.body:setPosition(love.math.random(25, ww - 25), -25)
-        tri.body:setPosition(love.math.random(25, ww - 25), -10)
+        red.body:setPosition(love.math.random(25, ww - 25), -25)
+        green.body:setPosition(love.math.random(25, ww - 25), -25)
+        blue.body:setPosition(love.math.random(25, ww - 25), -10)
         basket.body:setPosition((ww / 2), wh - 50)
 
         -- In game variables
@@ -59,7 +57,7 @@ function love.load()
         end
 
         -- Set up fruits array which can be randomly indexed to show which "fruit" the player should catch
-        fruits = {'circle', 'triangle', 'square'}
+        fruits = {'red', 'blue', 'green'}
         fruit = fruits[love.math.random(3)]
         -- Random time interval at which the fruit to harvest is switched
         time = love.math.random(5, 10)
@@ -113,9 +111,9 @@ function love.update(dt)
 
         -- Get positions of bodies
         x, y = basket.body:getPosition()
-        local cx, cy = circle.body:getPosition()
-        local tx, ty = tri.body:getPosition()
-        local sx, sy = sq.body:getPosition()
+        local rx, ry = red.body:getPosition()
+        local bx, by = blue.body:getPosition()
+        local gx, gy = green.body:getPosition()
 
         -- Variable to check if the player tries to move the basket, when it's true the position of the basket is reset
         move = false
@@ -140,14 +138,14 @@ function love.update(dt)
         end
 
         -- Making fruits come down the screen using fspeed variable
-        circle.body:setPosition(cx, cy + fspeed * dt)
-        tri.body:setPosition(tx, ty + fspeed * dt)
-        sq.body:setPosition(sx, sy + fspeed * dt)
+        red.body:setPosition(rx, ry + fspeed * dt)
+        blue.body:setPosition(bx, by + fspeed * dt)
+        green.body:setPosition(gx, gy + fspeed * dt)
 
         -- Check if player has caught fruit (basket it touching fruit and fruit is in the right area), then either
         -- award points and reset count variable or decrease lives and reset increase to 0. Always reset position of fruit. 
-        if basket.body:isTouching(circle.body) and (cx >= x - 50) and (cx <= x + 50) and (cy <= y) then
-            if fruit == 'circle' then
+        if basket.body:isTouching(red.body) and (rx >= x - 50) and (rx <= x + 50) and (ry <= y) then
+            if fruit == 'red' then
                 score = score + inc
                 inc = inc + 1
                 love.audio.play(gain)
@@ -159,11 +157,11 @@ function love.update(dt)
                 lives = lives - 1
                 love.audio.play(life)
             end
-            circle.body:setPosition(love.math.random(25, ww - 25), -25)
+            red.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if basket.body:isTouching(tri.body) and (tx >= x - 75) and (tx <= x + 75) and (ty <= y) then
-            if fruit == 'triangle' then
+        if basket.body:isTouching(blue.body) and (bx >= x - 50) and (bx <= x + 50) and (by <= y) then
+            if fruit == 'blue' then
                 score = score + inc
                 inc = inc + 1
                 love.audio.play(gain)
@@ -175,11 +173,11 @@ function love.update(dt)
                 lives = lives - 1
                 love.audio.play(life)
             end
-            tri.body:setPosition(love.math.random(25, ww - 25), -10)
+            blue.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if basket.body:isTouching(sq.body) and (sx >= x - 50) and (sx <= x + 50) and (sy <= y) then
-            if fruit == 'square' then
+        if basket.body:isTouching(green.body) and (gx >= x - 50) and (gx <= x + 50) and (gy <= y) then
+            if fruit == 'green' then
                 score = score + inc
                 inc = inc + 1
                 love.audio.play(gain)
@@ -191,32 +189,32 @@ function love.update(dt)
                 lives = lives - 1
                 love.audio.play(life)
             end
-            sq.body:setPosition(love.math.random(25, ww - 25), -25)
+            green.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
         -- Reset fruit positions when they reach the bottom of the screen, if fruit to harvest is missed increase count and reset increase
-        if cy >= wh + 25 then
-            if fruit == 'circle' then
+        if ry >= wh + 25 then
+            if fruit == 'red' then
                 count = count + 1
                 inc = 1
             end
-            circle.body:setPosition(love.math.random(25, ww - 25), -10)
+            red.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if ty >= wh + 10 then
-            if fruit == 'triangle' then
+        if by >= wh + 25 then
+            if fruit == 'blue' then
                 count = count + 1
                 inc = 1
             end
-            tri.body:setPosition(love.math.random(25, ww - 25), -10)
+            blue.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if sy >= wh + 25 then
-            if fruit == 'square' then
+        if gy >= wh + 25 then
+            if fruit == 'green' then
                 count = count + 1
                 inc = 1
             end
-            sq.body:setPosition(love.math.random(25, ww - 25), -25)
+            green.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
         -- If player drops fruit they were supposed to catch 3 times in a row they lose a life, count resets to 0 
@@ -279,13 +277,18 @@ end
 
 function love.draw()
     if play then
-        -- Draw all the bodies 
+        -- Draw all the bodies
+        love.graphics.setColor(love.math.colorFromBytes(160, 82, 45))
         love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
-        love.graphics.polygon('fill', tri.body:getWorldPoints(tri.shape:getPoints()))
-        love.graphics.polygon('fill', sq.body:getWorldPoints(sq.shape:getPoints()))
-        love.graphics.circle('fill', circle.body:getX(), circle.body:getY(), circle.shape:getRadius())
+        love.graphics.setColor(0, 0, 1)
+        love.graphics.circle('fill', blue.body:getX(), blue.body:getY(), blue.shape:getRadius())
+        love.graphics.setColor(0, 1, 0)
+        love.graphics.circle('fill', green.body:getX(), green.body:getY(), green.shape:getRadius())
+        love.graphics.setColor(1, 0, 0)
+        love.graphics.circle('fill', red.body:getX(), red.body:getY(), red.shape:getRadius())
 
         -- Show all the in game variables in the top left corner of the screen
+        love.graphics.setColor(1, 1, 1)
         love.graphics.print('Score: '..score..'\nLives: '..lives..'\nCount: '..count..'\nHarvest: '..fruit, 15, 15)
 
         -- Show a gain in points when player catches correct fruit
@@ -294,12 +297,15 @@ function love.draw()
         end
     elseif loser then
         -- Game Over screen
-        love.graphics.print('GAME OVER', ww / 2, wh / 2)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print('GAME OVER', (ww / 2) - 75, wh / 2)
     elseif help then
         -- Instructions screen
-        love.graphics.printf("Instructions\n(press 'esc' to exit)\n\nThe aim of the game is to harvest as many 'fruits' as you can. The fruits fall from the top of the screen and you can harvest them by putting your basket underneath them before they hit the floor. You can move your basket using the left and right arrow keys.\n\nHowever, the fruit that you need to harvest will change periodically. The fruit to harvest is displayed in the top left corner of the screen. When the fruit to harvest changes, a clown will alert you by honking his horn. But the clown also attempts to throw you off by blowing his horn at times when the fruit to harvest has not changed!\n\nYou gain points for harvesting the correct fruit. If you keep harvesting the correct fruit without dropping any or harvesting fruits you were not supposed to, the number of points you gain increases. However, if you harvest the wrong fruit or drop the fruit you were supposed to harvest 3 times in a row then you will lose a life. You only have 3 lives so be careful! Your score, lives, and count of how many fruits to harvest you have dropped in a row, are also displayed in the top left corner of the screen.\n\nThat's all you need to know. Enjoy!", 15, 15, 930)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.printf("Instructions\n(press 'esc' to exit)\n\nThis year's harvest has caused great havoc! We need your help to harvest all the fruits you can. Fruits are falling all over the place from the sky. Harvest them by catching them in your basket which is controlled using the left and right arrow keys.\n\nBut beware! The fruit that you need to harvest will change periodically. The fruit to harvest is displayed in the top left corner of your screen. When the fruit to harvest changes, a clown will alert you by honking his horn. However, this mischievous clown also attempts to throw you off by blowing his horn at times when the fruit to harvest has not changed!\n\nYou will be rewarded with points for harvesting the correct fruit. If you continuously harvest the correct fruit without dropping any or harvesting fruits you were not supposed to, your reward increases. However, if you harvest the wrong fruit or drop the fruit you were supposed to harvest 3 times in a row then you will lose a life. You only have 3 lives so be careful! Your score, lives, and count of how many fruits to harvest you have dropped in a row, are also displayed in the top left corner of your screen.\n\nGood Luck!", 15, 15, 930)
     else
         -- Loadscreen
-        love.graphics.print("Press Spacebar to Start\nPress 'i' for Instructions\nHighscore: "..highscore, 15, 15)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print("HARVEST HAVOC\n\nPress Spacebar to Start\nPress 'i' for Instructions\nHighscore: "..highscore, 15, 15)
     end
 end

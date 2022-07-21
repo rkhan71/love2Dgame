@@ -79,6 +79,7 @@ function love.load()
     play = false
     loser = false
     help = false
+    pause = false
 end
 
 function love.update(dt)
@@ -235,6 +236,31 @@ function love.update(dt)
             loser = true
             reset()
         end
+
+        -- Pause game
+        function love.keypressed(key)
+            if key == 'p' then
+                play = false
+                pause = true
+                love.audio.pause(playing)
+            end
+        end
+    elseif pause then
+        function love.keypressed(key)
+            if key == 'p' then
+                pause = false
+                play = true
+            elseif key == 'r' then
+                love.audio.stop(playing)
+                reset()
+                pause = false
+                play = true
+            elseif key == 'q' then
+                love.audio.stop(playing)
+                reset()
+                pause = false
+            end
+        end
     elseif loser then
         -- Player has just lost so play game over sound once losing life sound is over. Wait a bit to let loss sink in.
         if not life:isPlaying() then
@@ -256,14 +282,12 @@ function love.update(dt)
         end
     else
         function love.keypressed(key)
-            -- Here the game is not being played so we allow the player to start the game using spacebar
             if key == 'space' and loser == false then
+                -- Here the game is not being played so we allow the player to start the game using spacebar
                 love.audio.stop(loadscreen)
                 play = true
-            end
-
-            -- Let player see instructions on how to play the game
-            if key == 'i' and loser == false then
+            elseif key == 'i' and loser == false then
+                -- Let player see instructions on how to play the game
                 help = true
             end
         end
@@ -302,7 +326,10 @@ function love.draw()
     elseif help then
         -- Instructions screen
         love.graphics.setColor(1, 1, 1)
-        love.graphics.printf("Instructions\n(press 'esc' to exit)\n\nThis year's harvest has caused great havoc! We need your help to harvest all the fruits you can. Fruits are falling all over the place from the sky. Harvest them by catching them in your basket which is controlled using the left and right arrow keys.\n\nBut beware! The fruit that you need to harvest will change periodically. The fruit to harvest is displayed in the top left corner of your screen. When the fruit to harvest changes, a clown will alert you by honking his horn. However, this mischievous clown also attempts to throw you off by blowing his horn at times when the fruit to harvest has not changed!\n\nYou will be rewarded with points for harvesting the correct fruit. If you continuously harvest the correct fruit without dropping any or harvesting fruits you were not supposed to, your reward increases. However, if you harvest the wrong fruit or drop the fruit you were supposed to harvest 3 times in a row then you will lose a life. You only have 3 lives so be careful! Your score, lives, and count of how many fruits to harvest you have dropped in a row, are also displayed in the top left corner of your screen.\n\nGood Luck!", 15, 15, 930)
+        love.graphics.printf("Instructions\n(press 'esc' to exit)\n\nThis year's harvest has caused great havoc! We need your help to harvest all the fruits you can. Fruits are falling all over the place from the sky. Harvest them by catching them in your basket which is controlled using the left and right arrow keys.\n\nBut beware! The fruit that you need to harvest will change periodically. The fruit to harvest is displayed in the top left corner of your screen. When the fruit to harvest changes, a clown will alert you by honking his horn. However, this mischievous clown also attempts to throw you off by blowing his horn at times when the fruit to harvest has not changed!\n\nYou will be rewarded with points for harvesting the correct fruit. If you continuously harvest the correct fruit without dropping any or harvesting fruits you were not supposed to, your reward increases. However, if you harvest the wrong fruit or drop the fruit you were supposed to harvest 3 times in a row then you will lose a life. You only have 3 lives so be careful! Your score, lives, and count of how many fruits to harvest you have dropped in a row, are also displayed in the top left corner of your screen.\n\nPress 'p' to pause the game. Good Luck!", 15, 15, 930)
+    elseif pause then
+        -- Pause screen
+        love.graphics.print("GAME PAUSED\n\nPress 'p' to resume\nPress 'r' to restart\nPress 'q' to quit", 15, 15)
     else
         -- Loadscreen
         love.graphics.setColor(1, 1, 1)

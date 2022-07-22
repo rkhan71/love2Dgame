@@ -72,10 +72,15 @@ function love.load()
         -- variable to see when player scores points, and timer for how long to show gain in points
         point = false
         ptimer = 0
+
+        -- variables to help with counting missed fruits
+        countedr = false
+        countedg = false
+        countedb = false
     end
     reset()
 
-    -- variables to check whether the game is being played and if a player has just lost
+    -- boolean variables to check the state of the game
     play = false
     loser = false
     help = false
@@ -193,28 +198,38 @@ function love.update(dt)
             green.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
+        -- If fruit to harvest is missed increase count and reset increase
+        if ry >= y - 40 and ry <= y - 30 and fruit == 'red' and not countedr then
+            countedr = true
+            count = count + 1
+            inc = 1
+        end
+
+        if gy >= y - 40 and gy <= y - 30 and fruit == 'green' and not countedg then
+            countedg = true
+            count = count + 1
+            inc = 1
+        end
+
+        if by >= y - 40 and by <= y - 30 and fruit == 'blue' and not countedb then
+            countedb = true
+            count = count + 1
+            inc = 1
+        end
+
         -- Reset fruit positions when they reach the bottom of the screen, if fruit to harvest is missed increase count and reset increase
         if ry >= wh + 25 then
-            if fruit == 'red' then
-                count = count + 1
-                inc = 1
-            end
+            countedr = false
             red.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
         if by >= wh + 25 then
-            if fruit == 'blue' then
-                count = count + 1
-                inc = 1
-            end
+            countedb = false
             blue.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
         if gy >= wh + 25 then
-            if fruit == 'green' then
-                count = count + 1
-                inc = 1
-            end
+            countedg = false
             green.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
@@ -300,7 +315,7 @@ function love.update(dt)
 end
 
 function love.draw()
-    if play then
+    if play or pause then
         -- Draw all the bodies
         love.graphics.setColor(love.math.colorFromBytes(160, 82, 45))
         love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
@@ -311,12 +326,21 @@ function love.draw()
         love.graphics.setColor(1, 0, 0)
         love.graphics.circle('fill', red.body:getX(), red.body:getY(), red.shape:getRadius())
 
-        -- Show all the in game variables in the top left corner of the screen
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.print('Score: '..score..'\nLives: '..lives..'\nCount: '..count..'\nHarvest: '..fruit, 15, 15)
+        -- Pause screen
+        if pause then
+            love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
+            love.graphics.rectangle('fill', 0, 0, ww, wh)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.print("GAME PAUSED\n\nPress 'p' to resume\nPress 'r' to restart\nPress 'q' to quit", (ww / 2) - 50, (wh / 2) - 50)
+        else
+            -- Show all the in game variables in the top left corner of the screen unless game is paused
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.print('Score: '..score..'\nLives: '..lives..'\nCount: '..count..'\nHarvest: '..fruit, 15, 15)
+        end
 
         -- Show a gain in points when player catches correct fruit
         if point then
+            love.graphics.setColor(1, 1, 1)
             love.graphics.print('+'..inc - 1, ww / 2, wh / 2)
         end
     elseif loser then
@@ -327,9 +351,6 @@ function love.draw()
         -- Instructions screen
         love.graphics.setColor(1, 1, 1)
         love.graphics.printf("Instructions\n(press 'esc' to exit)\n\nThis year's harvest has caused great havoc! We need your help to harvest all the fruits you can. Fruits are falling all over the place from the sky. Harvest them by catching them in your basket which is controlled using the left and right arrow keys.\n\nBut beware! The fruit that you need to harvest will change periodically. The fruit to harvest is displayed in the top left corner of your screen. When the fruit to harvest changes, a clown will alert you by honking his horn. However, this mischievous clown also attempts to throw you off by blowing his horn at times when the fruit to harvest has not changed!\n\nYou will be rewarded with points for harvesting the correct fruit. If you continuously harvest the correct fruit without dropping any or harvesting fruits you were not supposed to, your reward increases. However, if you harvest the wrong fruit or drop the fruit you were supposed to harvest 3 times in a row then you will lose a life. You only have 3 lives so be careful! Your score, lives, and count of how many fruits to harvest you have dropped in a row, are also displayed in the top left corner of your screen.\n\nPress 'p' to pause the game. Good Luck!", 15, 15, 930)
-    elseif pause then
-        -- Pause screen
-        love.graphics.print("GAME PAUSED\n\nPress 'p' to resume\nPress 'r' to restart\nPress 'q' to quit", 15, 15)
     else
         -- Loadscreen
         love.graphics.setColor(1, 1, 1)

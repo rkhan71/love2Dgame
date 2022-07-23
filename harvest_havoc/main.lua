@@ -34,6 +34,7 @@ function love.load()
     gameover = love.audio.newSource('gameover.mp3', 'static')
     change = love.audio.newSource('change.mp3', 'static')
     gain = love.audio.newSource('gain.mp3', 'static')
+    splat = love.audio.newSource('splat.mp3', 'static')
 
     -- Reset function called whenever game ends so that when player restarts, the game is normal
     function reset()
@@ -208,18 +209,21 @@ function love.update(dt)
             countedr = true
             count = count + 1
             inc = 1
+            love.audio.play(splat)
         end
 
         if gy >= y - 50 and gy <= y - 40 and fruit == 'green' and not countedg then
             countedg = true
             count = count + 1
             inc = 1
+            love.audio.play(splat)
         end
 
         if by >= y - 50 and by <= y - 40 and fruit == 'blue' and not countedb then
             countedb = true
             count = count + 1
             inc = 1
+            love.audio.play(splat)
         end
 
         -- Reset fruit positions when they reach the bottom of the screen, if fruit to harvest is missed increase count and reset increase
@@ -340,7 +344,15 @@ function love.draw()
         else
             -- Show all the in game variables in the top left corner of the screen unless game is paused
             love.graphics.setColor(1, 1, 1)
-            love.graphics.print('Score: '..score..'\nLives: '..lives..'\nCount: '..count..'\nHarvest: '..fruit, 15, 15)
+            love.graphics.print('Score: '..score..'\nLives: '..lives..'\nCount: '..count..'\nHarvest: ', 15, 15)
+            if fruit == 'red' then
+                love.graphics.setColor(1, 0, 0)
+            elseif fruit == 'green' then
+                love.graphics.setColor(0, 1, 0)
+            else
+                love.graphics.setColor(0, 0, 1)
+            end
+            love.graphics.circle('fill', 77, 65, 8)
         end
 
         -- Show a gain in points when player catches correct fruit

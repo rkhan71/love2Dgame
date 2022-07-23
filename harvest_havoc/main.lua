@@ -74,11 +74,15 @@ function love.load()
         point = false
         ptimer = 0
 
-        -- boolean variables to help with counting missed fruits and checking when sound of fruit change has been played
-        countedr = false
-        countedg = false
-        countedb = false
+        -- boolean variable to check when sound of fruit change has been played
         changed = false
+
+        -- Timers to help with showing and hiding fruits that have hit the ground
+        stimers = {}
+        stimers.red = 0
+        stimers.green = 0
+        stimers.blue = 0
+
     end
     reset()
 
@@ -115,6 +119,13 @@ function love.update(dt)
         ptimer = ptimer - dt
         if ptimer <= 0 then
             point = false
+        end
+
+        -- Timers for splats
+        for key, stimer in pairs(stimers) do
+            if stimers[key] > 0 then
+                stimers[key] = stimers[key] - dt
+            end
         end
 
         -- Increase speed of fruits and basket as time passes
@@ -204,42 +215,38 @@ function love.update(dt)
             green.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        -- If fruit to harvest is missed increase count and reset increase
-        if ry >= y - 50 and ry <= y - 40 and fruit == 'red' and not countedr then
-            countedr = true
-            count = count + 1
-            inc = 1
-            love.audio.play(splat)
-        end
-
-        if gy >= y - 50 and gy <= y - 40 and fruit == 'green' and not countedg then
-            countedg = true
-            count = count + 1
-            inc = 1
-            love.audio.play(splat)
-        end
-
-        if by >= y - 50 and by <= y - 40 and fruit == 'blue' and not countedb then
-            countedb = true
-            count = count + 1
-            inc = 1
-            love.audio.play(splat)
-        end
-
         -- Reset fruit positions when they reach the bottom of the screen, if fruit to harvest is missed increase count and reset increase
-        if ry >= wh + 25 then
-            countedr = false
+        if ry >= wh - 45 then
+            if fruit == 'red' then
+                count = count + 1
+                inc = 1
+                love.audio.play(splat)
+            end
+            rsx = red.body:getX()
+            stimers.red = 3
             red.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if by >= wh + 25 then
-            countedb = false
-            blue.body:setPosition(love.math.random(25, ww - 25), -25)
+        if gy >= wh - 45 then
+            if fruit == 'green' then
+                count = count + 1
+                inc = 1
+                love.audio.play(splat)
+            end
+            gsx = green.body:getX()
+            stimers.green = 3
+            green.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if gy >= wh + 25 then
-            countedg = false
-            green.body:setPosition(love.math.random(25, ww - 25), -25)
+        if by >= wh - 45 then
+            if fruit == 'blue' then
+                count = count + 1
+                inc = 1
+                love.audio.play(splat)
+            end
+            bsx = blue.body:getX()
+            stimers.blue = 3
+            blue.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
         -- If player drops fruit they were supposed to catch 3 times in a row they lose a life, count resets to 0 
@@ -325,13 +332,13 @@ end
 
 function love.draw()
     if play or pause then
-        -- Draw all the bodies
+        -- Draw background
         love.graphics.setColor(love.math.colorFromBytes(135, 206, 235))
         love.graphics.rectangle('fill', 0, 0, ww, wh - 100)
         love.graphics.setColor(love.math.colorFromBytes(34, 139, 34))
         love.graphics.rectangle('fill', 0, wh - 100, ww, 100)
-        love.graphics.setColor(love.math.colorFromBytes(102, 51, 0))
-        love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
+
+        -- Draw fruits
         love.graphics.setColor(0, 0, 1)
         love.graphics.circle('fill', blue.body:getX(), blue.body:getY(), blue.shape:getRadius())
         love.graphics.setColor(1, 1, 0)
@@ -343,7 +350,7 @@ function love.draw()
         if pause then
             love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
             love.graphics.rectangle('fill', 0, 0, ww, wh)
-            love.graphics.setColor(1, 1, 1)
+            love.graphics.setColor(0, 0, 0)
             love.graphics.print("GAME PAUSED\n\nPress 'p' to resume\nPress 'r' to restart\nPress 'q' to quit", (ww / 2) - 50, (wh / 2) - 50)
         else
             -- Show all the in game variables in the top left corner of the screen unless game is paused
@@ -364,6 +371,26 @@ function love.draw()
             love.graphics.setColor(0, 0, 0)
             love.graphics.print('+'..inc - 1, ww / 2, wh / 2)
         end
+
+        -- Show fallen fruit
+        if stimers.red > 0 then
+            love.graphics.setColor(1, 0, 0)
+            love.graphics.ellipse('fill', rsx, wh - 20, red.shape:getRadius(), 5)
+        end
+
+        if stimers.green > 0 then
+            love.graphics.setColor(1, 1, 0)
+            love.graphics.ellipse('fill', gsx, wh - 20, green.shape:getRadius(), 5)
+        end
+
+        if stimers.blue > 0 then
+            love.graphics.setColor(0, 0, 1)
+            love.graphics.ellipse('fill', bsx, wh - 20, blue.shape:getRadius(), 5)
+        end
+
+        -- Draw basket
+        love.graphics.setColor(love.math.colorFromBytes(102, 51, 0))
+        love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
     elseif loser then
         -- Game Over screen
         love.graphics.setColor(1, 1, 1)

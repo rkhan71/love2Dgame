@@ -73,10 +73,11 @@ function love.load()
         point = false
         ptimer = 0
 
-        -- variables to help with counting missed fruits
+        -- boolean variables to help with counting missed fruits and checking when sound of fruit change has been played
         countedr = false
         countedg = false
         countedb = false
+        changed = false
     end
     reset()
 
@@ -99,10 +100,14 @@ function love.update(dt)
 
         -- Timer for change in fruit to harvest, once it reaches zero play sound, reselect fruit randomly, and reset timer
         time = time - dt
-        if time <= 0 then
+        if time <= 1 and not changed then
             love.audio.play(change)
+            changed = true
+        end
+        if time <= 0 then
             time = love.math.random(5, 10)
             fruit = fruits[love.math.random(3)]
+            changed = false
         end
 
         -- Timer for how long to show gain in points
@@ -199,19 +204,19 @@ function love.update(dt)
         end
 
         -- If fruit to harvest is missed increase count and reset increase
-        if ry >= y - 40 and ry <= y - 30 and fruit == 'red' and not countedr then
+        if ry >= y - 50 and ry <= y - 40 and fruit == 'red' and not countedr then
             countedr = true
             count = count + 1
             inc = 1
         end
 
-        if gy >= y - 40 and gy <= y - 30 and fruit == 'green' and not countedg then
+        if gy >= y - 50 and gy <= y - 40 and fruit == 'green' and not countedg then
             countedg = true
             count = count + 1
             inc = 1
         end
 
-        if by >= y - 40 and by <= y - 30 and fruit == 'blue' and not countedb then
+        if by >= y - 50 and by <= y - 40 and fruit == 'blue' and not countedb then
             countedb = true
             count = count + 1
             inc = 1

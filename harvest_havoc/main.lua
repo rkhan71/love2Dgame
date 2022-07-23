@@ -8,7 +8,7 @@ function love.load()
     world = love.physics.newWorld(0, 0, false)
 
     basket = {}
-    basket.body = love.physics.newBody(world, (ww / 2), wh - 50, 'kinematic')
+    basket.body = love.physics.newBody(world, (ww / 2), wh - 70, 'kinematic')
     basket.shape = love.physics.newRectangleShape(100, 100)
     basket.fixture = love.physics.newFixture(basket.body, basket.shape)
 
@@ -42,7 +42,7 @@ function love.load()
         red.body:setPosition(love.math.random(25, ww - 25), -25)
         green.body:setPosition(love.math.random(25, ww - 25), -25)
         blue.body:setPosition(love.math.random(25, ww - 25), -10)
-        basket.body:setPosition((ww / 2), wh - 50)
+        basket.body:setPosition((ww / 2), wh - 70)
 
         -- In game variables
         score = 0
@@ -326,11 +326,15 @@ end
 function love.draw()
     if play or pause then
         -- Draw all the bodies
-        love.graphics.setColor(love.math.colorFromBytes(160, 82, 45))
+        love.graphics.setColor(love.math.colorFromBytes(135, 206, 235))
+        love.graphics.rectangle('fill', 0, 0, ww, wh - 100)
+        love.graphics.setColor(love.math.colorFromBytes(34, 139, 34))
+        love.graphics.rectangle('fill', 0, wh - 100, ww, 100)
+        love.graphics.setColor(love.math.colorFromBytes(102, 51, 0))
         love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
         love.graphics.setColor(0, 0, 1)
         love.graphics.circle('fill', blue.body:getX(), blue.body:getY(), blue.shape:getRadius())
-        love.graphics.setColor(0, 1, 0)
+        love.graphics.setColor(1, 1, 0)
         love.graphics.circle('fill', green.body:getX(), green.body:getY(), green.shape:getRadius())
         love.graphics.setColor(1, 0, 0)
         love.graphics.circle('fill', red.body:getX(), red.body:getY(), red.shape:getRadius())
@@ -343,12 +347,12 @@ function love.draw()
             love.graphics.print("GAME PAUSED\n\nPress 'p' to resume\nPress 'r' to restart\nPress 'q' to quit", (ww / 2) - 50, (wh / 2) - 50)
         else
             -- Show all the in game variables in the top left corner of the screen unless game is paused
-            love.graphics.setColor(1, 1, 1)
+            love.graphics.setColor(0, 0, 0)
             love.graphics.print('Score: '..score..'\nLives: '..lives..'\nCount: '..count..'\nHarvest: ', 15, 15)
             if fruit == 'red' then
                 love.graphics.setColor(1, 0, 0)
             elseif fruit == 'green' then
-                love.graphics.setColor(0, 1, 0)
+                love.graphics.setColor(1, 1, 0)
             else
                 love.graphics.setColor(0, 0, 1)
             end
@@ -357,7 +361,7 @@ function love.draw()
 
         -- Show a gain in points when player catches correct fruit
         if point then
-            love.graphics.setColor(1, 1, 1)
+            love.graphics.setColor(0, 0, 0)
             love.graphics.print('+'..inc - 1, ww / 2, wh / 2)
         end
     elseif loser then

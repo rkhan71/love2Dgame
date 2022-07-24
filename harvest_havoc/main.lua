@@ -36,6 +36,15 @@ function love.load()
     gain = love.audio.newSource('gain.mp3', 'static')
     splat = love.audio.newSource('splat.mp3', 'static')
 
+    -- Load in images of clouds and their widths
+    cloud1 = love.graphics.newImage('cloud1.png')
+    cloud2 = love.graphics.newImage('cloud2.png')
+    cloud3 = love.graphics.newImage('cloud3.png')
+    cwid = {}
+    cwid[1] = cloud1:getWidth()
+    cwid[2] = cloud2:getWidth()
+    cwid[3] = cloud3:getWidth()
+
     -- Reset function called whenever game ends so that when player restarts, the game is normal
     function reset()
         -- Positions of bodies
@@ -86,6 +95,12 @@ function love.load()
 
         -- timer for gameover screen
         gotimer = 5
+
+        -- positions of clouds
+        cpos = {}
+        cpos[1] = 0
+        cpos[2] = 700
+        cpos[3] = 400
     end
     reset()
 
@@ -97,6 +112,16 @@ function love.load()
 end
 
 function love.update(dt)
+    -- Clouds moving unless game paused or player just lost
+    if not loser and not pause then
+        for i = 1, 3 do
+            if cpos[i] > ww then
+                cpos[i] = -cwid[i]
+            end
+            cpos[i] = cpos[i] + 1
+        end
+    end
+
     if play then
         -- Play in-game music
         if not playing:isPlaying() then
@@ -353,6 +378,10 @@ function love.draw()
         love.graphics.rectangle('fill', 0, 0, ww, wh - 90)
         love.graphics.setColor(love.math.colorFromBytes(34, 139, 34))
         love.graphics.rectangle('fill', 0, wh - 90, ww, 90)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.draw(cloud1, cpos[1], 50)
+        love.graphics.draw(cloud2, cpos[2], 100)
+        love.graphics.draw(cloud3, cpos[3], 20)
     end
 
     function statics()

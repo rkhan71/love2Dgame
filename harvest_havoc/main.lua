@@ -74,8 +74,9 @@ function love.load()
         point = false
         ptimer = 0
 
-        -- boolean variable to check when sound of fruit change has been played
+        -- boolean variables to check when fruit change and gameover sounds have been played
         changed = false
+        goplayed = false
 
         -- Timers to help with showing and hiding fruits that have hit the ground
         stimers = {}
@@ -83,6 +84,8 @@ function love.load()
         stimers.green = 0
         stimers.blue = 0
 
+        -- timer for gameover screen
+        gotimer = 5
     end
     reset()
 
@@ -167,7 +170,7 @@ function love.update(dt)
 
         -- Check if player has caught fruit (basket it touching fruit and fruit is in the right area), then either
         -- award points and reset count variable or decrease lives and reset increase to 0. Always reset position of fruit. 
-        if basket.body:isTouching(red.body) and (rx >= x - 50) and (rx <= x + 50) and (ry <= y) then
+        if basket.body:isTouching(red.body) and (rx >= x - 50) and (rx <= x + 50) then
             if fruit == 'red' then
                 score = score + inc
                 inc = inc + 1
@@ -183,7 +186,7 @@ function love.update(dt)
             red.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if basket.body:isTouching(blue.body) and (bx >= x - 50) and (bx <= x + 50) and (by <= y) then
+        if basket.body:isTouching(blue.body) and (bx >= x - 50) and (bx <= x + 50) then
             if fruit == 'blue' then
                 score = score + inc
                 inc = inc + 1
@@ -199,7 +202,7 @@ function love.update(dt)
             blue.body:setPosition(love.math.random(25, ww - 25), -25)
         end
 
-        if basket.body:isTouching(green.body) and (gx >= x - 50) and (gx <= x + 50) and (gy <= y) then
+        if basket.body:isTouching(green.body) and (gx >= x - 50) and (gx <= x + 50) then
             if fruit == 'green' then
                 score = score + inc
                 inc = inc + 1
@@ -265,7 +268,6 @@ function love.update(dt)
             play = false
             love.audio.stop(playing)
             loser = true
-            reset()
         end
 
         -- Pause game
@@ -293,11 +295,25 @@ function love.update(dt)
             end
         end
     elseif loser then
-        -- Player has just lost so play game over sound once losing life sound is over. Wait a bit to let loss sink in.
-        if not life:isPlaying() then
+        -- Player has just lost so play game over sound once losing life sound is over.
+        gotimer = gotimer - dt
+        if not life:isPlaying() and not goplayed then
             love.audio.play(gameover)
-            love.timer.sleep(5)
-            loser = false
+            goplayed = true
+        end
+        if gotimer <= 0 then
+            function love.keypressed(key)
+                if key == 'r' then
+                    love.audio.stop(gameover)
+                    reset()
+                    loser = false
+                    play = true
+                elseif key == 'q' then
+                    love.audio.stop(gameover)
+                    reset()
+                    loser = false
+                end
+            end
         end
     elseif help then
         -- Let user exit instructions screen
@@ -308,7 +324,7 @@ function love.update(dt)
         end
 
         -- Loadscreen music
-        if not loadscreen:isPlaying() and not gameover:isPlaying() then
+        if not loadscreen:isPlaying() then
             love.audio.play(loadscreen)
         end
     else
@@ -331,20 +347,62 @@ function love.update(dt)
 end
 
 function love.draw()
-    if play or pause then
+    function background()
         -- Draw background
         love.graphics.setColor(love.math.colorFromBytes(135, 206, 235))
-        love.graphics.rectangle('fill', 0, 0, ww, wh - 100)
+        love.graphics.rectangle('fill', 0, 0, ww, wh - 90)
         love.graphics.setColor(love.math.colorFromBytes(34, 139, 34))
-        love.graphics.rectangle('fill', 0, wh - 100, ww, 100)
+        love.graphics.rectangle('fill', 0, wh - 90, ww, 90)
+    end
 
-        -- Draw fruits
+    function statics()
+        -- Draw static basket and fruits in random positions
+        love.graphics.setColor(love.math.colorFromBytes(102, 51, 0))
+        love.graphics.rectangle('fill', ww / 2, wh - 120, 100, 100)
+        love.graphics.setColor(1, 0, 0)
+        love.graphics.circle('fill', ww / 6, wh - 400, 25)
+        love.graphics.setColor(1, 1, 0)
+        love.graphics.circle('fill', ww / 2, wh - 200, 25)
+        love.graphics.setColor(0, 0, 1)
+        love.graphics.circle('fill', ww - 200, wh - 300, 25)
+    end
+
+    if play or pause or loser then
+        background()
+
+        -- Draw fruits in actual positions
         love.graphics.setColor(0, 0, 1)
         love.graphics.circle('fill', blue.body:getX(), blue.body:getY(), blue.shape:getRadius())
         love.graphics.setColor(1, 1, 0)
         love.graphics.circle('fill', green.body:getX(), green.body:getY(), green.shape:getRadius())
         love.graphics.setColor(1, 0, 0)
         love.graphics.circle('fill', red.body:getX(), red.body:getY(), red.shape:getRadius())
+
+        -- Show a gain in points when player catches correct fruit
+        if point and inc > 1 then
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.print('+'..inc - 1, ww / 2, wh / 2)
+        end
+
+        -- Show fallen fruit
+        if stimers.red > 0 then
+            love.graphics.setColor(1, 0, 0)
+            love.graphics.ellipse('fill', rsx, wh - 20, red.shape:getRadius(), 5)
+        end
+
+        if stimers.green > 0 then
+            love.graphics.setColor(1, 1, 0)
+            love.graphics.ellipse('fill', gsx, wh - 20, green.shape:getRadius(), 5)
+        end
+
+        if stimers.blue > 0 then
+            love.graphics.setColor(0, 0, 1)
+            love.graphics.ellipse('fill', bsx, wh - 20, blue.shape:getRadius(), 5)
+        end
+
+        -- Draw basket in actual position
+        love.graphics.setColor(love.math.colorFromBytes(102, 51, 0))
+        love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
 
         -- Pause screen
         if pause then
@@ -366,42 +424,27 @@ function love.draw()
             love.graphics.circle('fill', 77, 65, 8)
         end
 
-        -- Show a gain in points when player catches correct fruit
-        if point then
+        -- Game over screen
+        if loser then
+            love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
+            love.graphics.rectangle('fill', 0, 0, ww, wh)
             love.graphics.setColor(0, 0, 0)
-            love.graphics.print('+'..inc - 1, ww / 2, wh / 2)
+            love.graphics.print('GAME OVER\n\n', (ww / 2) - 75, (wh / 2) - 20)
+            if gotimer <= 0 then
+                love.graphics.print("Press 'r' to restart\nPress 'q' to go back to main menu", (ww / 2) - 100, wh / 2)
+            end
         end
-
-        -- Show fallen fruit
-        if stimers.red > 0 then
-            love.graphics.setColor(1, 0, 0)
-            love.graphics.ellipse('fill', rsx, wh - 20, red.shape:getRadius(), 5)
-        end
-
-        if stimers.green > 0 then
-            love.graphics.setColor(1, 1, 0)
-            love.graphics.ellipse('fill', gsx, wh - 20, green.shape:getRadius(), 5)
-        end
-
-        if stimers.blue > 0 then
-            love.graphics.setColor(0, 0, 1)
-            love.graphics.ellipse('fill', bsx, wh - 20, blue.shape:getRadius(), 5)
-        end
-
-        -- Draw basket
-        love.graphics.setColor(love.math.colorFromBytes(102, 51, 0))
-        love.graphics.polygon('fill', basket.body:getWorldPoints(basket.shape:getPoints()))
-    elseif loser then
-        -- Game Over screen
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.print('GAME OVER', (ww / 2) - 75, wh / 2)
     elseif help then
         -- Instructions screen
-        love.graphics.setColor(1, 1, 1)
+        background()
+        statics()
+        love.graphics.setColor(0, 0, 0)
         love.graphics.printf("Instructions\n(press 'esc' to exit)\n\nThis year's harvest has caused great havoc! We need your help to harvest all the fruits you can. Fruits are falling all over the place from the sky. Harvest them by catching them in your basket which is controlled using the left and right arrow keys.\n\nBut beware! The fruit that you need to harvest will change periodically. The fruit to harvest is displayed in the top left corner of your screen. When the fruit to harvest changes, a clown will alert you by honking his horn. However, this mischievous clown also attempts to throw you off by blowing his horn at times when the fruit to harvest has not changed!\n\nYou will be rewarded with points for harvesting the correct fruit. If you continuously harvest the correct fruit without dropping any or harvesting fruits you were not supposed to, your reward increases. However, if you harvest the wrong fruit or drop the fruit you were supposed to harvest 3 times in a row then you will lose a life. You only have 3 lives so be careful! Your score, lives, and count of how many fruits to harvest you have dropped in a row, are also displayed in the top left corner of your screen.\n\nPress 'p' to pause the game. Good Luck!", 15, 15, 930)
     else
         -- Loadscreen
-        love.graphics.setColor(1, 1, 1)
+        background()
+        statics()
+        love.graphics.setColor(0, 0, 0)
         love.graphics.print("HARVEST HAVOC\n\nPress Spacebar to Start\nPress 'i' for Instructions\nHighscore: "..highscore, 15, 15)
     end
 end

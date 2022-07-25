@@ -206,6 +206,7 @@ function love.update(dt)
             else
                 inc = 1
                 lives = lives - 1
+                love.audio.stop(life)
                 love.audio.play(life)
             end
             red.body:setPosition(love.math.random(25, ww - 25), -25)
@@ -222,6 +223,7 @@ function love.update(dt)
             else
                 inc = 1
                 lives = lives - 1
+                love.audio.stop(life)
                 love.audio.play(life)
             end
             blue.body:setPosition(love.math.random(25, ww - 25), -25)
@@ -238,6 +240,7 @@ function love.update(dt)
             else
                 inc = 1
                 lives = lives - 1
+                love.audio.stop(life)
                 love.audio.play(life)
             end
             green.body:setPosition(love.math.random(25, ww - 25), -25)
@@ -281,6 +284,7 @@ function love.update(dt)
         if count == 3 then
             lives = lives - 1
             count = 0
+            love.audio.stop(life)
             love.audio.play(life)
         end
 

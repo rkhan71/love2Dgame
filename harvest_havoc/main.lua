@@ -442,7 +442,7 @@ function love.draw()
             love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
             love.graphics.rectangle('fill', 0, 0, ww, wh)
             love.graphics.setColor(0, 0, 0)
-            love.graphics.print("GAME PAUSED\n\nPress 'p' to resume\nPress 'r' to restart\nPress 'q' to quit", (ww / 2) - 50, (wh / 2) - 50)
+            love.graphics.printf("GAME PAUSED\n\nPress 'p' to resume\nPress 'r' to restart\nPress 'q' to quit", 0, (wh / 2) - 50, ww, 'center')
         else
             -- Show all the in game variables in the top left corner of the screen unless game is paused
             love.graphics.setColor(0, 0, 0)
@@ -462,9 +462,9 @@ function love.draw()
             love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
             love.graphics.rectangle('fill', 0, 0, ww, wh)
             love.graphics.setColor(0, 0, 0)
-            love.graphics.print('GAME OVER\n\n', (ww / 2) - 75, (wh / 2) - 20)
+            love.graphics.printf('GAME OVER\n\n', 0, (wh / 2) - 20, ww, 'center')
             if gotimer <= 0 then
-                love.graphics.print("Press 'r' to restart\nPress 'q' to go back to main menu", (ww / 2) - 100, wh / 2)
+                love.graphics.printf("Press 'r' to restart\nPress 'q' to go back to main menu", 0, wh / 2, ww, 'center')
             end
         end
     elseif help then
@@ -472,12 +472,12 @@ function love.draw()
         background()
         statics()
         love.graphics.setColor(0, 0, 0)
-        love.graphics.printf("Instructions\n(press 'esc' to exit)\n\nThis year's harvest has caused great havoc! We need your help to harvest all the fruits you can. Fruits are falling all over the place from the sky. Harvest them by catching them in your basket which is controlled using the left and right arrow keys.\n\nBut beware! The fruit that you need to harvest will change periodically. The fruit to harvest is displayed in the top left corner of your screen. When the fruit to harvest changes, a clown will alert you by honking his horn. However, this mischievous clown also attempts to throw you off by blowing his horn at times when the fruit to harvest has not changed!\n\nYou will be rewarded with points for harvesting the correct fruit. If you continuously harvest the correct fruit without dropping any or harvesting fruits you were not supposed to, your reward increases. However, if you harvest the wrong fruit or drop the fruit you were supposed to harvest 3 times in a row then you will lose a life. You only have 3 lives so be careful! Your score, lives, and count of how many fruits to harvest you have dropped in a row, are also displayed in the top left corner of your screen.\n\nPress 'p' to pause the game. Good Luck!", 15, 15, 930)
+        love.graphics.printf("Instructions\n(press 'esc' to exit)\n\nScore points by catching the fruit to harvest in your basket. Move the basket along the bottom of the screen using the left and right arrow keys. The points you gain from harvesting fruit increase if you continuously harvest the correct fruit without dropping any.\n\nThe fruit to harvest changes every so often. A clown will tell you when the fruit to harvest is about to change by blowing his horn. However, he will also blow his horn at random times to try and throw you off. You will see what fruit to harvest in the top left corner of your screen.\n\nBut be careful! Harvesting the wrong fruit, or dropping the fruit to harvest 3 times in a row will lead to the loss of 1 of your 3 lives. Your score, remaining lives, and count of fruits to harvest you have dropped in a row, will also be shown in the top left corner of your screen.\n\nPress 'p' to pause the game at any time. Good luck!", 250, 20, 460, 'center')
     else
         -- Loadscreen
         background()
         statics()
         love.graphics.setColor(0, 0, 0)
-        love.graphics.print("HARVEST HAVOC\n\nPress Spacebar to Start\nPress 'i' for Instructions\nHighscore: "..highscore, 15, 15)
+        love.graphics.printf("HARVEST HAVOC\n\nPress Spacebar to Start\nPress 'i' for Instructions\nHighscore: "..highscore, 0, 20, ww, 'center')
     end
 end
